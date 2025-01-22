@@ -1,9 +1,9 @@
 package model;
 
 public class PasswordEntry {
-    private String service;
-    private String username;
-    private String password;
+    private final String service;
+    private final String username;
+    private final String password;
 
     public PasswordEntry(String service, String username, String password) {
         this.service = service;

@@ -44,6 +44,14 @@ public class PasswordController {
     public void addPassword(PasswordEntry entry){
         passwordList.add(entry);
         savePassword();
+        System.out.println("Password added");
+    }
+
+    public void removePassword(PasswordEntry entry) {
+        passwordList.removeIf(passwordEntry -> passwordEntry.getService().equals(entry.getService()) &&
+                passwordEntry.getUsername().equals(entry.getUsername()) &&
+                passwordEntry.getPassword().equals(entry.getPassword()));
+        savePassword();
     }
 
     public List<PasswordEntry> getPasswords(){
