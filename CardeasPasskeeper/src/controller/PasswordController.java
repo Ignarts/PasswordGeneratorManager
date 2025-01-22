@@ -42,6 +42,15 @@ public class PasswordController {
     }
 
     public void addPassword(PasswordEntry entry){
+        boolean exists = passwordList.stream().anyMatch(passwordEntry -> passwordEntry.getService().equals(entry.getService()) &&
+                passwordEntry.getUsername().equals(entry.getUsername()) &&
+                passwordEntry.getPassword().equals(entry.getPassword()));
+
+        if(exists){
+            System.out.println("Password already exists");
+            return;
+        }
+
         passwordList.add(entry);
         savePassword();
         System.out.println("Password added");
