@@ -3,6 +3,7 @@ package view;
 
 import controller.PasswordController;
 import model.PasswordEntry;
+import model.PasswordManager;
 
 import javax.swing.*;
 import java.awt.*;
@@ -18,14 +19,23 @@ public class PasswordManagerGUI {
     private static final Color green = new Color(128, 162, 100);
     private static final Color darkGreen = new Color(87, 116, 77);
 
+    private static String name = "";
+    private static String username = "";
+    private static String password = "";
+
     public static void main(String[] args) {
         JFrame frame = new JFrame("Cardea Passkeeper");
-        frame.setLayout(new FlowLayout());
+        frame.setLayout(new BorderLayout());
 
-        createTextsFields(frame);
+        JPanel textPanel = new JPanel();
+        textPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        createTextsFields(textPanel);
+        frame.add(textPanel, BorderLayout.CENTER);
 
-        createAddPasswordButton(frame);
-        createRemovePasswordButton(frame);
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 5));
+        createAddPasswordButton(buttonPanel);
+        createRemovePasswordButton(buttonPanel);
+        frame.add(buttonPanel, BorderLayout.SOUTH);
 
         frame.setSize(400, 300);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -36,24 +46,24 @@ public class PasswordManagerGUI {
     }
 
     // Create Add Password Button and add logic to it
-    public static void createAddPasswordButton(JFrame frame) {
+    public static void createAddPasswordButton(JPanel panel) {
         JButton addPasswordButton = new JButton("Add Password");
-        frame.add(addPasswordButton);
+        panel.add(addPasswordButton);
         addPasswordButton.setBackground(green);
 
         addPasswordButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                PasswordEntry entry = new PasswordEntry("test", "username", "password");
+                PasswordEntry entry = new PasswordEntry(name, username, PasswordManager.generatePassword(16, true, true, true));
                 controller.addPassword(entry);
             }
         });
     }
 
     // Create Remove Button and add logic to it
-    public static void createRemovePasswordButton(JFrame frame) {
+    public static void createRemovePasswordButton(JPanel panel) {
         JButton removePasswordButton = new JButton("Remove Password");
-        frame.add(removePasswordButton);
+        panel.add(removePasswordButton);
         removePasswordButton.setBackground(darkGreen);
 
         removePasswordButton.addActionListener(new ActionListener() {
@@ -65,14 +75,14 @@ public class PasswordManagerGUI {
         });
     }
 
-    public static void createTextsFields(JFrame frame) {
+    public static void createTextsFields(JPanel panel) {
         JTextField applicationName = new JTextField("");
         applicationName.setPreferredSize(new Dimension(200, 30));
 
         JTextField username = new JTextField("");
         username.setPreferredSize(new Dimension(200, 30));
 
-        frame.add(applicationName);
-        frame.add(username);
+        panel.add(applicationName);
+        panel.add(username);
     }
 }
