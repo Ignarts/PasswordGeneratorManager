@@ -21,6 +21,9 @@ public class PasswordManagerGUI {
 
     private static JTextField applicationNameTextField;
     private static JTextField usernameTextField;
+    private static JCheckBox upperCheckBox;
+    private static JCheckBox digitCheckBox;
+    private static JCheckBox specialCharCheckBox;
 
     public static void main(String[] args) {
         JFrame frame = new JFrame("Cardea Passkeeper");
@@ -31,10 +34,20 @@ public class PasswordManagerGUI {
         createTextsFields(textPanel);
         frame.add(textPanel, BorderLayout.CENTER);
 
+        JPanel southPanel = new JPanel();
+        southPanel.setLayout(new GridLayout(2, 1, 5, 5));
+
+        JPanel checkBoxPanel = new JPanel();
+        checkBoxPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        createCheckboxesFields(checkBoxPanel);
+        southPanel.add(checkBoxPanel);
+
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 5));
         createAddPasswordButton(buttonPanel);
         createRemovePasswordButton(buttonPanel);
-        frame.add(buttonPanel, BorderLayout.SOUTH);
+        southPanel.add(buttonPanel);
+
+        frame.add(southPanel, BorderLayout.SOUTH);
 
         frame.setSize(400, 300);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -58,7 +71,11 @@ public class PasswordManagerGUI {
                 String name = applicationNameTextField.getText().trim();
                 String username = usernameTextField.getText().trim();
 
-                PasswordEntry entry = new PasswordEntry(name, username, PasswordManager.generatePassword(16, true, true, true));
+                PasswordEntry entry = new PasswordEntry(
+                        name,
+                        username,
+                        PasswordManager.generatePassword(16, upperCheckBox.isSelected(), digitCheckBox.isSelected(), specialCharCheckBox.isSelected())
+                );
                 controller.addPassword(entry);
             }
         });
@@ -90,5 +107,14 @@ public class PasswordManagerGUI {
 
         panel.add(applicationNameTextField);
         panel.add(usernameTextField);
+    }
+
+    public static void createCheckboxesFields(JPanel panel) {
+        upperCheckBox = new JCheckBox("Upper Letters");
+        panel.add(upperCheckBox);
+        digitCheckBox = new JCheckBox("Number Digits");
+        panel.add(digitCheckBox);
+        specialCharCheckBox = new JCheckBox("Special Characters");
+        panel.add(specialCharCheckBox);
     }
 }
