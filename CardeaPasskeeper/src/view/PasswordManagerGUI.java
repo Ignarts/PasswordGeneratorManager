@@ -19,9 +19,8 @@ public class PasswordManagerGUI {
     private static final Color green = new Color(128, 162, 100);
     private static final Color darkGreen = new Color(87, 116, 77);
 
-    private static String name = "";
-    private static String username = "";
-    private static String password = "";
+    private static JTextField applicationNameTextField;
+    private static JTextField usernameTextField;
 
     public static void main(String[] args) {
         JFrame frame = new JFrame("Cardea Passkeeper");
@@ -51,9 +50,14 @@ public class PasswordManagerGUI {
         panel.add(addPasswordButton);
         addPasswordButton.setBackground(green);
 
+
+
         addPasswordButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                String name = applicationNameTextField.getText().trim();
+                String username = usernameTextField.getText().trim();
+
                 PasswordEntry entry = new PasswordEntry(name, username, PasswordManager.generatePassword(16, true, true, true));
                 controller.addPassword(entry);
             }
@@ -69,20 +73,22 @@ public class PasswordManagerGUI {
         removePasswordButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                PasswordEntry entry = new PasswordEntry("test", "username", "password");
-                controller.removePassword(entry);
+                String name = applicationNameTextField.getText().trim();
+                String username = usernameTextField.getText().trim();
+
+                controller.removePassword(name, username);
             }
         });
     }
 
     public static void createTextsFields(JPanel panel) {
-        JTextField applicationName = new JTextField("");
-        applicationName.setPreferredSize(new Dimension(200, 30));
+        applicationNameTextField = new JTextField("");
+        applicationNameTextField.setPreferredSize(new Dimension(200, 30));
 
-        JTextField username = new JTextField("");
-        username.setPreferredSize(new Dimension(200, 30));
+        usernameTextField = new JTextField("");
+        usernameTextField.setPreferredSize(new Dimension(200, 30));
 
-        panel.add(applicationName);
-        panel.add(username);
+        panel.add(applicationNameTextField);
+        panel.add(usernameTextField);
     }
 }

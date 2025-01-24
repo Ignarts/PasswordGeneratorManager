@@ -56,10 +56,9 @@ public class PasswordController {
         System.out.println("Password added");
     }
 
-    public void removePassword(PasswordEntry entry) {
-        passwordList.removeIf(passwordEntry -> passwordEntry.getService().equals(entry.getService()) &&
-                passwordEntry.getUsername().equals(entry.getUsername()) &&
-                passwordEntry.getPassword().equals(entry.getPassword()));
+    public void removePassword(String applicationName, String username) {
+        passwordList.removeIf(passwordEntry -> passwordEntry.getService().equals(applicationName) &&
+                passwordEntry.getUsername().equals(username));
         savePassword();
     }
 
