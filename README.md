@@ -58,6 +58,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Contact
 For any inquiries or issues, feel free to reach out:
-- **Email:** your.email@example.com
-- **GitHub:** [yourusername](https://github.com/yourusername)
+- **Email:** ignarts.dev@gmail.com
+- **GitHub:** [ignarts.dev](https://github.com/Ignarts)
+- **WEB**: https://www.ignarts.dev
 
