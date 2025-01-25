@@ -25,7 +25,7 @@ public class PasswordManagerGUI {
     private static JCheckBox digitCheckBox;
     private static JCheckBox specialCharCheckBox;
 
-    public static void main(String[] args) {
+    public static void runApplication() {
         JFrame frame = new JFrame("Cardea Passkeeper");
         frame.setLayout(new BorderLayout());
 

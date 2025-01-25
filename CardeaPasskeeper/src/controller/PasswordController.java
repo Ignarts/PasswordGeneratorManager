@@ -54,7 +54,7 @@ public class PasswordController {
                     null,
                     messageLabel,
                     "Error Adding Password",
-                    JOptionPane.PLAIN_MESSAGE
+                    JOptionPane.ERROR_MESSAGE
             );
 
             return;
@@ -75,9 +75,34 @@ public class PasswordController {
     }
 
     public void removePassword(String applicationName, String username) {
-        passwordList.removeIf(passwordEntry -> passwordEntry.getService().equals(applicationName) &&
-                passwordEntry.getUsername().equals(username));
-        savePassword();
+        boolean removed = passwordList.removeIf(passwordEntry ->
+                passwordEntry.getService().equals(applicationName) &&
+                        passwordEntry.getUsername().equals(username)
+        );
+
+        if (removed) {
+            JLabel messageLabel = new JLabel("Password removed successfully.");
+            messageLabel.setHorizontalAlignment(SwingConstants.CENTER);
+
+            JOptionPane.showMessageDialog(
+                    null,
+                    messageLabel,
+                    "Password Removed",
+                    JOptionPane.PLAIN_MESSAGE
+            );
+
+            savePassword();
+        } else {
+            JLabel messageLabel = new JLabel("Password does not exist.");
+            messageLabel.setHorizontalAlignment(SwingConstants.CENTER);
+
+            JOptionPane.showMessageDialog(
+                    null,
+                    messageLabel,
+                    "Error Removing Password",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }
     }
 
     public List<PasswordEntry> getPasswords(){
