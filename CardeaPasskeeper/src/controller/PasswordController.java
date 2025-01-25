@@ -2,6 +2,7 @@ package controller;
 
 import model.PasswordEntry;
 
+import javax.swing.*;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,17 +44,34 @@ public class PasswordController {
 
     public void addPassword(PasswordEntry entry){
         boolean exists = passwordList.stream().anyMatch(passwordEntry -> passwordEntry.getService().equals(entry.getService()) &&
-                passwordEntry.getUsername().equals(entry.getUsername()) &&
-                passwordEntry.getPassword().equals(entry.getPassword()));
+                passwordEntry.getUsername().equals(entry.getUsername()));
 
         if(exists){
-            System.out.println("Password already exists");
+            JLabel messageLabel = new JLabel("Password already exists. Change username and app name.");
+            messageLabel.setHorizontalAlignment(SwingConstants.CENTER);
+
+            JOptionPane.showMessageDialog(
+                    null,
+                    messageLabel,
+                    "Error Adding Password",
+                    JOptionPane.PLAIN_MESSAGE
+            );
+
             return;
         }
 
         passwordList.add(entry);
         savePassword();
-        System.out.println("Password added");
+
+        JLabel messageLabel = new JLabel("Password saved correctly");
+        messageLabel.setHorizontalAlignment(SwingConstants.CENTER);
+
+        JOptionPane.showMessageDialog(
+                null,
+                messageLabel,
+                "Password Added",
+                JOptionPane.PLAIN_MESSAGE
+        );
     }
 
     public void removePassword(String applicationName, String username) {

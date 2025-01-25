@@ -63,8 +63,6 @@ public class PasswordManagerGUI {
         panel.add(addPasswordButton);
         addPasswordButton.setBackground(green);
 
-
-
         addPasswordButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
