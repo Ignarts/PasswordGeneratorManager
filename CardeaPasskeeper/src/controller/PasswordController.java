@@ -1,5 +1,6 @@
 package controller;
 
+import model.EncryptionUtils;
 import model.PasswordEntry;
 
 import javax.swing.*;
@@ -19,28 +20,37 @@ public class PasswordController {
     }
 
     public void savePassword(){
-        try(BufferedWriter writer = new BufferedWriter(new FileWriter((FILE_PATH)))){
-            for(PasswordEntry entry : passwordList){
-                writer.write(entry.getService() + "," + entry.getUsername() + "," + entry.getPassword());
-                writer.newLine();
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_PATH))) {
+            for (PasswordEntry entry : passwordList) {
+                try {
+                    String encryptedPassword = EncryptionUtils.encrypt(entry.getPassword());
+                    writer.write(entry.getService() + "," + entry.getUsername() + "," + encryptedPassword);
+                    writer.newLine();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         } catch (IOException e){
             e.printStackTrace();
         }
-
     }
 
     public void loadPasswords(){
         passwordList = new ArrayList<>();
-        try(BufferedReader reader = new BufferedReader(new FileReader(FILE_PATH))){
+        try (BufferedReader reader = new BufferedReader(new FileReader(FILE_PATH))) {
             String line;
-            while((line = reader.readLine()) != null){
+            while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(",");
-                if(parts.length == 3){
-                    passwordList.add(new PasswordEntry(parts[0], parts[1], parts[2]));
+                if (parts.length == 3) {
+                    try {
+                        String decryptedPassword = EncryptionUtils.decrypt(parts[2].trim());
+                        passwordList.add(new PasswordEntry(parts[0], parts[1], decryptedPassword));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             }
-        }catch (IOException e){
+        } catch (IOException e){
             passwordList = new ArrayList<>();
         }
     }
@@ -108,11 +118,31 @@ public class PasswordController {
         }
     }
 
-    public static void copyPasswordToClipboard(String password){
-        StringSelection stringSelection = new StringSelection(password);
-        Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-        clipboard.setContents(stringSelection, null);
+    public static void copyPasswordToClipboard(String encryptedPassword){
+        try {
+            String decryptedPassword = EncryptionUtils.decrypt(encryptedPassword);
+            StringSelection stringSelection = new StringSelection(decryptedPassword);
+            Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+            clipboard.setContents(stringSelection, null);
+
+            JOptionPane.showMessageDialog(
+                    null,
+                    "Password copied to clipboard successfully!",
+                    "Success",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(
+                    null,
+                    "Error copying the password.",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+            e.printStackTrace();
+        }
     }
+
+
 
     public List<PasswordEntry> getPasswords(){
         return passwordList;

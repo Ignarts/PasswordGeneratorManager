@@ -11,6 +11,7 @@ public class PasswordEntry {
         this.password = password;
     }
 
+
     public String getService() {
         return service;
     }

@@ -147,13 +147,11 @@ public class PasswordManagerGUI {
                         .findFirst();
 
                 if (foundEntry.isPresent()) {
-                    PasswordController.copyPasswordToClipboard(foundEntry.get().getPassword());
-                    JOptionPane.showMessageDialog(
-                            null,
-                            "Password copied to clipboard!",
-                            "Success",
-                            JOptionPane.INFORMATION_MESSAGE
-                    );
+                    try {
+                        PasswordController.copyPasswordToClipboard(foundEntry.get().getPassword());
+                    } catch (Exception ex) {
+                        JOptionPane.showMessageDialog(null, "Error decrypting password", "Error", JOptionPane.ERROR_MESSAGE);
+                    }
                 } else {
                     JOptionPane.showMessageDialog(
                             null,
