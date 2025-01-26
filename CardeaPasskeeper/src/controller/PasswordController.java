@@ -15,42 +15,34 @@ public class PasswordController {
     private static final  String FILE_PATH = "data/passwords.txt";
     private List<PasswordEntry> passwordList;
 
-    public PasswordController(){
+    public PasswordController() {
         loadPasswords();
+        EncryptionUtils.initializeEncryption(passwordList);
+        savePassword();  // Guardar con la nueva clave de encriptación
     }
 
-    public void savePassword(){
+    public void savePassword() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_PATH))) {
             for (PasswordEntry entry : passwordList) {
-                try {
-                    String encryptedPassword = EncryptionUtils.encrypt(entry.getPassword());
-                    writer.write(entry.getService() + "," + entry.getUsername() + "," + encryptedPassword);
-                    writer.newLine();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                writer.write(entry.getService() + "," + entry.getUsername() + "," + entry.getPassword());
+                writer.newLine();
             }
-        } catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public void loadPasswords(){
+    public void loadPasswords() {
         passwordList = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(FILE_PATH))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(",");
                 if (parts.length == 3) {
-                    try {
-                        String decryptedPassword = EncryptionUtils.decrypt(parts[2].trim());
-                        passwordList.add(new PasswordEntry(parts[0], parts[1], decryptedPassword));
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                    passwordList.add(new PasswordEntry(parts[0], parts[1], parts[2]));
                 }
             }
-        } catch (IOException e){
+        } catch (IOException e) {
             passwordList = new ArrayList<>();
         }
     }

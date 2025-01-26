@@ -3,14 +3,13 @@ package model;
 public class PasswordEntry {
     private final String service;
     private final String username;
-    private final String password;
+    private String password;  // Cambiado de final para permitir actualización
 
     public PasswordEntry(String service, String username, String password) {
         this.service = service;
         this.username = username;
         this.password = password;
     }
-
 
     public String getService() {
         return service;
@@ -24,8 +23,13 @@ public class PasswordEntry {
         return password;
     }
 
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
     @Override
     public String toString() {
         return service + "," + username + "," + password;
     }
 }
+

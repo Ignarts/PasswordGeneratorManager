@@ -6,32 +6,39 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
 import java.util.Base64;
+import java.util.List;
 
 public class EncryptionUtils {
     private static final String KEY_FILE = "data/secret.key";
     private static SecretKey secretKey;
 
-    static {
+    public static void initializeEncryption(List<PasswordEntry> passwordList) {
         try {
             File keyFile = new File(KEY_FILE);
             if (keyFile.exists()) {
-                // Cargar clave desde el archivo existente
+                // Load current passwords
                 byte[] keyBytes = Base64.getDecoder().decode(new String(new FileInputStream(KEY_FILE).readAllBytes()));
                 secretKey = new SecretKeySpec(keyBytes, "AES");
-            } else {
-                // Crear directorio si no existe
-                File directory = new File("data");
-                if (!directory.exists()) {
-                    directory.mkdir();
+
+                // Des-encrypted all password
+                for (PasswordEntry entry : passwordList) {
+                    entry.setPassword(decrypt(entry.getPassword()));
                 }
-                // Generar nueva clave y guardarla
-                KeyGenerator keyGen = KeyGenerator.getInstance("AES");
-                keyGen.init(256);
-                secretKey = keyGen.generateKey();
-                saveSecretKey(secretKey);
             }
+
+            // Generate new encryption key
+            KeyGenerator keyGen = KeyGenerator.getInstance("AES");
+            keyGen.init(256);
+            secretKey = keyGen.generateKey();
+            saveSecretKey(secretKey);
+
+            // Re-Encrypt all passwords
+            for (PasswordEntry entry : passwordList) {
+                entry.setPassword(encrypt(entry.getPassword()));
+            }
+
         } catch (Exception e) {
-            throw new RuntimeException("Error initializing encryption key", e);
+            throw new RuntimeException("Error during encryption initialization", e);
         }
     }
 
