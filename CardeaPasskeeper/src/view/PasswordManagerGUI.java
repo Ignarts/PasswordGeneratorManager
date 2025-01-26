@@ -9,6 +9,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Optional;
 
 public class PasswordManagerGUI {
     public static PasswordController controller = new PasswordController();
@@ -29,19 +30,34 @@ public class PasswordManagerGUI {
         JFrame frame = new JFrame("Cardea Passkeeper");
         frame.setLayout(new BorderLayout());
 
+        JPanel centerPanel = new JPanel();
+        centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
+
+        // Panel fot Texts
         JPanel textPanel = new JPanel();
         textPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 10));
         createTextsFields(textPanel);
-        frame.add(textPanel, BorderLayout.CENTER);
+        centerPanel.add(textPanel, BorderLayout.CENTER);
 
+        // Copy Button
+        JPanel copyButtonPanel = new JPanel();
+        copyButtonPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        createCopyPasswordButton(copyButtonPanel);
+        centerPanel.add(copyButtonPanel, BorderLayout.CENTER);
+
+        frame.add(centerPanel, BorderLayout.CENTER);
+
+        // Panel for checkboxes and buttons
         JPanel southPanel = new JPanel();
         southPanel.setLayout(new GridLayout(2, 1, 5, 5));
 
+        // Checkboxes
         JPanel checkBoxPanel = new JPanel();
         checkBoxPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 10));
         createCheckboxesFields(checkBoxPanel);
         southPanel.add(checkBoxPanel);
 
+        // Buttons
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 5));
         createAddPasswordButton(buttonPanel);
         createRemovePasswordButton(buttonPanel);
@@ -114,5 +130,41 @@ public class PasswordManagerGUI {
         panel.add(digitCheckBox);
         specialCharCheckBox = new JCheckBox("Special Characters");
         panel.add(specialCharCheckBox);
+    }
+
+    public static void createCopyPasswordButton(JPanel panel) {
+        JButton copyPasswordButton = new JButton("Copy Password");
+        copyPasswordButton.setBackground(lightGreen);
+
+        copyPasswordButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String name = applicationNameTextField.getText().trim();
+                String username = usernameTextField.getText().trim();
+
+                Optional<PasswordEntry> foundEntry = controller.getPasswords().stream()
+                        .filter(entry -> entry.getService().equals(name) && entry.getUsername().equals(username))
+                        .findFirst();
+
+                if (foundEntry.isPresent()) {
+                    PasswordController.copyPasswordToClipboard(foundEntry.get().getPassword());
+                    JOptionPane.showMessageDialog(
+                            null,
+                            "Password copied to clipboard!",
+                            "Success",
+                            JOptionPane.INFORMATION_MESSAGE
+                    );
+                } else {
+                    JOptionPane.showMessageDialog(
+                            null,
+                            "No matching password found.",
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE
+                    );
+                }
+            }
+        });
+
+        panel.add(copyPasswordButton);
     }
 }

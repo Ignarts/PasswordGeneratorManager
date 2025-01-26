@@ -3,6 +3,9 @@ package controller;
 import model.PasswordEntry;
 
 import javax.swing.*;
+import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -103,6 +106,12 @@ public class PasswordController {
                     JOptionPane.ERROR_MESSAGE
             );
         }
+    }
+
+    public static void copyPasswordToClipboard(String password){
+        StringSelection stringSelection = new StringSelection(password);
+        Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+        clipboard.setContents(stringSelection, null);
     }
 
     public List<PasswordEntry> getPasswords(){
