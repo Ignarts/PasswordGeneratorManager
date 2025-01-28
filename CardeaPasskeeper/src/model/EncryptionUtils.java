@@ -1,5 +1,7 @@
 package model;
 
+import controller.PasswordController;
+
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
@@ -17,10 +19,12 @@ public class EncryptionUtils {
             File keyFile = new File(KEY_FILE);
 
             if (keyFile.exists() && keyFile.length() > 0) {
+                // Cargar clave existente
                 byte[] keyBytes = Base64.getDecoder().decode(new String(new FileInputStream(KEY_FILE).readAllBytes()));
                 secretKey = new SecretKeySpec(keyBytes, "AES");
                 System.out.println("Encryption key loaded successfully.");
             } else {
+                // Generar nueva clave si no existe
                 System.out.println("No existing key found. Generating a new key...");
                 KeyGenerator keyGen = KeyGenerator.getInstance("AES");
                 keyGen.init(256);
@@ -29,26 +33,12 @@ public class EncryptionUtils {
                 System.out.println("New encryption key generated and saved.");
             }
 
-            if (secretKey == null) {
-                throw new IllegalStateException("Encryption key could not be loaded or generated.");
-            }
-
-            // Solo desencriptar si hay contraseñas
-            if (!passwordList.isEmpty()) {
-                for (PasswordEntry entry : passwordList) {
-                    try {
-                        entry.setPassword(decrypt(entry.getPassword()));
-                    } catch (Exception e) {
-                        System.err.println("Error decrypting password for service: " + entry.getService());
-                    }
-                }
-
-                // Re-encriptar todas las contraseñas con la nueva clave
-                for (PasswordEntry entry : passwordList) {
-                    entry.setPassword(encrypt(entry.getPassword()));
+            // Desencriptar las contraseñas si es necesario (en el caso real)
+            for (PasswordEntry entry : passwordList) {
+                if (entry.getPassword().startsWith("{enc}")) {
+                    entry.setPassword(decrypt(entry.getPassword()));
                 }
             }
-
         } catch (Exception e) {
             throw new RuntimeException("Error during encryption initialization", e);
         }
@@ -69,14 +59,17 @@ public class EncryptionUtils {
         }
         Cipher cipher = Cipher.getInstance("AES");
         cipher.init(Cipher.ENCRYPT_MODE, secretKey);
-        return Base64.getEncoder().encodeToString(cipher.doFinal(plainText.getBytes()));
+        return "{enc}" + Base64.getEncoder().encodeToString(cipher.doFinal(plainText.getBytes()));
     }
-
 
     public static String decrypt(String cipherText) throws Exception {
         if (secretKey == null) {
             throw new IllegalStateException("Secret key is not initialized. Please check the encryption setup.");
         }
+        if (!cipherText.startsWith("{enc}")) {
+            return cipherText; // Si no tiene el prefijo, ya está desencriptado
+        }
+        cipherText = cipherText.substring(5); // Eliminar el prefijo {enc}
         Cipher cipher = Cipher.getInstance("AES");
         cipher.init(Cipher.DECRYPT_MODE, secretKey);
         return new String(cipher.doFinal(Base64.getDecoder().decode(cipherText)));

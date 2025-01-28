@@ -16,21 +16,21 @@ public class PasswordController {
     private List<PasswordEntry> passwordList;
 
     public PasswordController() {
-        loadPasswords();  // Cargar contraseñas desde el archivo
+        loadPasswords();  // Cargar las contraseñas desde el archivo
 
         if (passwordList.isEmpty()) {
             System.out.println("No passwords found. Initializing encryption with empty list.");
         }
 
-        EncryptionUtils.initializeEncryption(passwordList);  // Desencriptar y re-encriptar correctamente
-
-        if (!passwordList.isEmpty()) {
-            savePassword();  // Guardar con la nueva clave si hay contraseñas
-        }
+        // Inicializar encriptación y cargar/desencriptar contraseñas
+        EncryptionUtils.initializeEncryption(passwordList);
     }
 
+    public void savePasswords() {
+        if(EncryptionUtils.getSecretKey() == null) {
+            JOptionPane.showMessageDialog(null, JOptionPane.PLAIN_MESSAGE);
+        }
 
-    public void savePassword() {
         if (passwordList.isEmpty()) {
             System.out.println("No passwords to save. Skipping save operation.");
             return;
@@ -71,10 +71,6 @@ public class PasswordController {
 
     public void addPassword(PasswordEntry entry) {
         if (EncryptionUtils.getSecretKey() == null) {
-            EncryptionUtils.initializeEncryption(passwordList);
-        }
-
-        if (EncryptionUtils.getSecretKey() == null) {
             JOptionPane.showMessageDialog(null,
                     "Encryption key is not available. Please restart the application.",
                     "Error",
@@ -95,9 +91,9 @@ public class PasswordController {
         }
 
         try {
-            entry.setPassword(EncryptionUtils.encrypt(entry.getPassword()));
+            entry.setPassword(EncryptionUtils.encrypt(entry.getPassword())); // Encriptar al agregar
             passwordList.add(entry);
-            savePassword();
+            savePasswords();
             JOptionPane.showMessageDialog(null,
                     "Password saved correctly",
                     "Password Added",
@@ -110,7 +106,6 @@ public class PasswordController {
             e.printStackTrace();
         }
     }
-
 
     public void removePassword(String applicationName, String username) {
         boolean removed = passwordList.removeIf(passwordEntry ->
@@ -129,7 +124,7 @@ public class PasswordController {
                     JOptionPane.PLAIN_MESSAGE
             );
 
-            savePassword();
+            savePasswords();
         } else {
             JLabel messageLabel = new JLabel("Password does not exist.");
             messageLabel.setHorizontalAlignment(SwingConstants.CENTER);
@@ -145,7 +140,10 @@ public class PasswordController {
 
     public static void copyPasswordToClipboard(String encryptedPassword) {
         try {
-            String decryptedPassword = EncryptionUtils.decrypt(encryptedPassword);
+            String decryptedPassword = encryptedPassword.startsWith("{enc}")
+                    ? EncryptionUtils.decrypt(encryptedPassword)
+                    : encryptedPassword;
+
             StringSelection stringSelection = new StringSelection(decryptedPassword);
             Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
             clipboard.setContents(stringSelection, null);

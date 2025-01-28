@@ -90,7 +90,7 @@ public class PasswordManagerGUI {
                         username,
                         PasswordManager.generatePassword(16, upperCheckBox.isSelected(), digitCheckBox.isSelected(), specialCharCheckBox.isSelected())
                 );
-                controller.addPassword(entry);
+                controller.addPassword(entry); // Llamada al controlador
             }
         });
     }
