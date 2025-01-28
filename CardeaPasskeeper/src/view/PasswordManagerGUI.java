@@ -107,7 +107,23 @@ public class PasswordManagerGUI {
                 String name = applicationNameTextField.getText().trim();
                 String username = usernameTextField.getText().trim();
 
+                // Validar que los campos no estén vacíos
+                if (name.isEmpty() || username.isEmpty()) {
+                    JOptionPane.showMessageDialog(
+                            null,
+                            "Please enter both Application Name and Username.",
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE
+                    );
+                    return;
+                }
+
+                // Llamar al metodo del controlador para eliminar la contraseña
                 controller.removePassword(name, username);
+
+                // Limpiar los campos después de eliminar
+                applicationNameTextField.setText("");
+                usernameTextField.setText("");
             }
         });
     }

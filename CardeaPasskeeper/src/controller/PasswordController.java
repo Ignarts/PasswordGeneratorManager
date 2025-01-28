@@ -27,17 +27,14 @@ public class PasswordController {
     }
 
     public void savePasswords() {
-        if(EncryptionUtils.getSecretKey() == null) {
-            JOptionPane.showMessageDialog(null, JOptionPane.PLAIN_MESSAGE);
-        }
-
-        if (passwordList.isEmpty()) {
-            System.out.println("No passwords to save. Skipping save operation.");
+        if (EncryptionUtils.getSecretKey() == null) {
+            JOptionPane.showMessageDialog(null, "Encryption key is not available. Please restart the application.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_PATH))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_PATH, false))) { // false para sobrescribir
             for (PasswordEntry entry : passwordList) {
+                // Encriptar antes de guardar
                 String encryptedPassword = EncryptionUtils.encrypt(entry.getPassword());
                 writer.write(entry.getService() + "," + entry.getUsername() + "," + encryptedPassword);
                 writer.newLine();
@@ -47,7 +44,6 @@ public class PasswordController {
             System.err.println("Error saving passwords: " + e.getMessage());
         }
     }
-
 
     public void loadPasswords() {
         passwordList = new ArrayList<>();
@@ -114,6 +110,10 @@ public class PasswordController {
         );
 
         if (removed) {
+            // Guarda el estado actualizado de la lista en el archivo
+            savePasswords();
+
+            // Mensaje de éxito
             JLabel messageLabel = new JLabel("Password removed successfully.");
             messageLabel.setHorizontalAlignment(SwingConstants.CENTER);
 
@@ -123,9 +123,8 @@ public class PasswordController {
                     "Password Removed",
                     JOptionPane.PLAIN_MESSAGE
             );
-
-            savePasswords();
         } else {
+            // Mensaje de error si no se encuentra
             JLabel messageLabel = new JLabel("Password does not exist.");
             messageLabel.setHorizontalAlignment(SwingConstants.CENTER);
 
