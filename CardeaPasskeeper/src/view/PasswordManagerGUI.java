@@ -9,6 +9,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.URL;
 import java.util.Optional;
 
 public class PasswordManagerGUI {
@@ -23,6 +24,19 @@ public class PasswordManagerGUI {
         JFrame frame = new JFrame("Cardea Passkeeper");
         frame.setLayout(new BorderLayout(10, 10));
         frame.getContentPane().setBackground(new Color(44, 62, 80));
+
+        URL logoURL = PasswordManagerGUI.class.getClassLoader().getResource("resources/logo_CardeaPasskeeper.png");
+        if (logoURL != null) {
+            ImageIcon logo = new ImageIcon(logoURL);
+            frame.setIconImage(logo.getImage());
+
+            // Panel del logo
+            JLabel logoLabel = new JLabel(logo);
+            logoLabel.setHorizontalAlignment(SwingConstants.CENTER);
+            frame.add(logoLabel, BorderLayout.NORTH);
+        } else {
+            System.err.println("Error: Logo not found at resources/logo_CardeaPasskeeper.png");
+        }
 
         // Table Panel
         JPanel tablePanel = new JPanel(new BorderLayout());
