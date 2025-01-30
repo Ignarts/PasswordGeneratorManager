@@ -1,170 +1,110 @@
 package controller;
 
-import model.EncryptionUtils;
-import model.PasswordEntry;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
-import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.File;
+import java.io.FileWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Base64;
+import org.json.JSONObject;
 
 public class PasswordController {
-    private static final  String FILE_PATH = "data/passwords.txt";
-    private List<PasswordEntry> passwordList;
+    private static final String USER_FILE = "data/user.json";
+    private static String storedUsername;
+    private static String storedPasswordHash;
 
     public PasswordController() {
-        loadPasswords();  // Cargar las contraseñas desde el archivo
-
-        if (passwordList.isEmpty()) {
-            System.out.println("No passwords found. Initializing encryption with empty list.");
-        }
-
-        // Inicializar encriptación y cargar/desencriptar contraseñas
-        EncryptionUtils.initializeEncryption(passwordList);
+        loadUserCredentials();
     }
 
-    public void savePasswords() {
-        if (EncryptionUtils.getSecretKey() == null) {
-            JOptionPane.showMessageDialog(null, "Encryption key is not available. Please restart the application.", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_PATH, false))) { // false para sobrescribir
-            for (PasswordEntry entry : passwordList) {
-                // Encriptar antes de guardar
-                String encryptedPassword = EncryptionUtils.encrypt(entry.getPassword());
-                writer.write(entry.getService() + "," + entry.getUsername() + "," + encryptedPassword);
-                writer.newLine();
+    private void loadUserCredentials() {
+        File file = new File(USER_FILE);
+        if (!file.exists()) {
+            createNewUser();
+        } else {
+            try {
+                String content = new String(Files.readAllBytes(Paths.get(USER_FILE)));
+                JSONObject json = new JSONObject(content);
+                storedUsername = json.getString("username");
+                storedPasswordHash = json.getString("password");
+            } catch (Exception e) {
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(null, "Error loading user credentials.", "Error", JOptionPane.ERROR_MESSAGE);
             }
-            System.out.println("Passwords saved successfully.");
-        } catch (Exception e) {
-            System.err.println("Error saving passwords: " + e.getMessage());
         }
     }
 
-    public void loadPasswords() {
-        passwordList = new ArrayList<>();
-        try (BufferedReader reader = new BufferedReader(new FileReader(FILE_PATH))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] parts = line.split(",");
-                if (parts.length == 3) {
-                    try {
-                        passwordList.add(new PasswordEntry(parts[0], parts[1], parts[2]));
-                    } catch (Exception e) {
-                        System.err.println("Invalid password entry for service: " + parts[0]);
-                    }
-                }
-            }
-            System.out.println("Passwords loaded: " + passwordList.size());
-        } catch (IOException e) {
-            System.err.println("Error reading password file: " + e.getMessage());
-        }
-    }
-
-    public void addPassword(PasswordEntry entry) {
-        if (EncryptionUtils.getSecretKey() == null) {
-            JOptionPane.showMessageDialog(null,
-                    "Encryption key is not available. Please restart the application.",
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE);
-            return;
+    private void createNewUser() {
+        String username = JOptionPane.showInputDialog(null, "Choose a username:", "Setup", JOptionPane.QUESTION_MESSAGE);
+        if (username == null || username.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Username cannot be empty.", "Error", JOptionPane.ERROR_MESSAGE);
+            System.exit(0);
         }
 
-        boolean exists = passwordList.stream().anyMatch(passwordEntry ->
-                passwordEntry.getService().equals(entry.getService()) &&
-                        passwordEntry.getUsername().equals(entry.getUsername()));
-
-        if (exists) {
-            JOptionPane.showMessageDialog(null,
-                    "Password already exists. Change username and app name.",
-                    "Error Adding Password",
-                    JOptionPane.ERROR_MESSAGE);
-            return;
+        String password = JOptionPane.showInputDialog(null, "Set your password:", "Setup", JOptionPane.QUESTION_MESSAGE);
+        if (password == null || password.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Password cannot be empty.", "Error", JOptionPane.ERROR_MESSAGE);
+            System.exit(0);
         }
 
         try {
-            entry.setPassword(EncryptionUtils.encrypt(entry.getPassword())); // Encriptar al agregar
-            passwordList.add(entry);
-            savePasswords();
-            JOptionPane.showMessageDialog(null,
-                    "Password saved correctly",
-                    "Password Added",
-                    JOptionPane.PLAIN_MESSAGE);
+            String hashedPassword = Base64.getEncoder().encodeToString(password.getBytes());
+            JSONObject json = new JSONObject();
+            json.put("username", username);
+            json.put("password", hashedPassword);
+
+            FileWriter fileWriter = new FileWriter(USER_FILE);
+            fileWriter.write(json.toString());
+            fileWriter.close();
+
+            storedUsername = username;
+            storedPasswordHash = hashedPassword;
+
+            JOptionPane.showMessageDialog(null, "User created successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null,
-                    "Error saving password.",
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Error saving user credentials.", "Error", JOptionPane.ERROR_MESSAGE);
             e.printStackTrace();
         }
     }
 
-    public void removePassword(String applicationName, String username) {
-        boolean removed = passwordList.removeIf(passwordEntry ->
-                passwordEntry.getService().equals(applicationName) &&
-                        passwordEntry.getUsername().equals(username)
-        );
-
-        if (removed) {
-            // Guarda el estado actualizado de la lista en el archivo
-            savePasswords();
-
-            // Mensaje de éxito
-            JLabel messageLabel = new JLabel("Password removed successfully.");
-            messageLabel.setHorizontalAlignment(SwingConstants.CENTER);
-
-            JOptionPane.showMessageDialog(
-                    null,
-                    messageLabel,
-                    "Password Removed",
-                    JOptionPane.PLAIN_MESSAGE
-            );
-        } else {
-            // Mensaje de error si no se encuentra
-            JLabel messageLabel = new JLabel("Password does not exist.");
-            messageLabel.setHorizontalAlignment(SwingConstants.CENTER);
-
-            JOptionPane.showMessageDialog(
-                    null,
-                    messageLabel,
-                    "Error Removing Password",
-                    JOptionPane.ERROR_MESSAGE
-            );
+    public boolean authenticateUser(String username, String password) {
+        if (storedUsername == null || storedPasswordHash == null) {
+            JOptionPane.showMessageDialog(null, "No user credentials found!", "Error", JOptionPane.ERROR_MESSAGE);
+            return false;
         }
+
+        String hashedPassword = Base64.getEncoder().encodeToString(password.getBytes());
+        return storedUsername.equals(username) && storedPasswordHash.equals(hashedPassword);
     }
 
-    public static void copyPasswordToClipboard(String encryptedPassword) {
+    /**
+     * Copia una contraseña al portapapeles del sistema.
+     *
+     * @param password La contraseña desencriptada a copiar.
+     */
+    public static void copyPasswordToClipboard(String password) {
         try {
-            String decryptedPassword = encryptedPassword.startsWith("{enc}")
-                    ? EncryptionUtils.decrypt(encryptedPassword)
-                    : encryptedPassword;
-
-            StringSelection stringSelection = new StringSelection(decryptedPassword);
+            StringSelection stringSelection = new StringSelection(password);
             Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
             clipboard.setContents(stringSelection, null);
 
             JOptionPane.showMessageDialog(
                     null,
-                    "Password copied to clipboard successfully!",
+                    "Password copied to clipboard!",
                     "Success",
                     JOptionPane.INFORMATION_MESSAGE
             );
         } catch (Exception e) {
             JOptionPane.showMessageDialog(
                     null,
-                    "Error copying the password.",
+                    "Error copying password to clipboard.",
                     "Error",
                     JOptionPane.ERROR_MESSAGE
             );
             e.printStackTrace();
         }
-    }
-
-    public List<PasswordEntry> getPasswords(){
-        return passwordList;
     }
 }
