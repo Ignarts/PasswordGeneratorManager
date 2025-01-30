@@ -11,7 +11,6 @@ import java.awt.event.ActionListener;
 import java.io.*;
 
 public class PasswordManagerGUI {
-    private static PasswordController controller = new PasswordController();
 
     private static final Color brown = new Color(101, 77, 56);
     private static final Color lightBrown = new Color(241, 189, 143);
@@ -82,22 +81,14 @@ public class PasswordManagerGUI {
         addPasswordButton.addActionListener(e -> {
             String name = applicationNameTextField.getText().trim();
             String username = usernameTextField.getText().trim();
+            String password = PasswordManager.generatePassword(16, upperCheckBox.isSelected(), digitCheckBox.isSelected(), specialCharCheckBox.isSelected());
 
             if (name.isEmpty() || username.isEmpty()) {
                 JOptionPane.showMessageDialog(null, "Please enter both Service and Username.", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
-            try {
-                String password = PasswordManager.generatePassword(16, upperCheckBox.isSelected(), digitCheckBox.isSelected(), specialCharCheckBox.isSelected());
-                String encryptedPassword = EncryptionUtils.encrypt(password);
-
-                savePasswordToFile(name, username, encryptedPassword);
-
-                JOptionPane.showMessageDialog(null, "Password saved successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(null, "Error encrypting password.", "Error", JOptionPane.ERROR_MESSAGE);
-            }
+            PasswordController.savePassword(name, username, password);
         });
     }
 
@@ -115,11 +106,7 @@ public class PasswordManagerGUI {
                 return;
             }
 
-            if (removePasswordFromFile(name, username)) {
-                JOptionPane.showMessageDialog(null, "Password removed successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-            } else {
-                JOptionPane.showMessageDialog(null, "No matching password found.", "Error", JOptionPane.ERROR_MESSAGE);
-            }
+            PasswordController.removePassword(name, username);
         });
     }
 
@@ -155,25 +142,11 @@ public class PasswordManagerGUI {
                 return;
             }
 
-            try {
-                String decryptedPassword = EncryptionUtils.decrypt(encryptedPassword);
-                PasswordController.copyPasswordToClipboard(decryptedPassword);
-                JOptionPane.showMessageDialog(null, "Password copied to clipboard!", "Success", JOptionPane.INFORMATION_MESSAGE);
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(null, "Error decrypting password.", "Error", JOptionPane.ERROR_MESSAGE);
-            }
+            String decryptedPassword = EncryptionUtils.decrypt(encryptedPassword);
+            PasswordController.copyPasswordToClipboard(decryptedPassword);
         });
 
         panel.add(copyPasswordButton);
-    }
-
-    private static void savePasswordToFile(String service, String username, String encryptedPassword) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(PASSWORD_FILE, true))) {
-            writer.write(service + "," + username + "," + encryptedPassword);
-            writer.newLine();
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(null, "Error saving password.", "Error", JOptionPane.ERROR_MESSAGE);
-        }
     }
 
     private static String getPasswordFromFile(String service, String username) {
@@ -189,10 +162,5 @@ public class PasswordManagerGUI {
             JOptionPane.showMessageDialog(null, "Error reading password file.", "Error", JOptionPane.ERROR_MESSAGE);
         }
         return null;
-    }
-
-    private static boolean removePasswordFromFile(String service, String username) {
-        // Implementación de eliminación similar a la sugerida anteriormente
-        return true; // Temporalmente devuelve true
     }
 }
