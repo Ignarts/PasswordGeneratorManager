@@ -69,7 +69,7 @@ public class UserController {
     }
 
     private static void generateSalt() {
-        salt = new byte[16];
+        salt = new byte[32];
         new SecureRandom().nextBytes(salt);
 
         try (FileOutputStream fos = new FileOutputStream(SALT_FILE)) {
