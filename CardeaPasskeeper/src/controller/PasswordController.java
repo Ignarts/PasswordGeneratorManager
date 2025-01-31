@@ -1,13 +1,14 @@
 package controller;
 
 import model.EncryptionUtils;
+import model.PasswordEntry;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.io.*;
 import java.util.ArrayList;
-import java.util.List;
 
 public class PasswordController {
     private static final String PASSWORD_FILE = "data/passwords.txt";
@@ -60,6 +61,22 @@ public class PasswordController {
             JOptionPane.showMessageDialog(null, "Error reading password file.", "Error", JOptionPane.ERROR_MESSAGE);
         }
         return false;
+    }
+
+    public static ArrayList<PasswordEntry> getPasswords(){
+        ArrayList<PasswordEntry> passwordsList = new ArrayList<>();
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(PASSWORD_FILE))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                PasswordEntry passwordEntry = new PasswordEntry(parts[0], parts[1], parts[2]);
+                passwordsList.add(passwordEntry);
+            }
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(null, "Error reading password file.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+        return passwordsList;
     }
 
     /**
