@@ -176,32 +176,39 @@ public class PasswordManagerGUI {
             return;
         }
 
-        String encryptedPassword = tableModel.getValueAt(selectedRow, 2).toString();
-        PasswordController.copyPasswordToClipboard(encryptedPassword);
+        // Obtener el servicio y usuario seleccionados
+        String service = tableModel.getValueAt(selectedRow, 0).toString();
+        String username = tableModel.getValueAt(selectedRow, 1).toString();
+
+        // Buscar la contraseña encriptada en la lista de contraseñas
+        for (PasswordEntry entry : controller.getPasswords()) {
+            if (entry.getService().equals(service) && entry.getUsername().equals(username)) {
+                try {
+                    // Desencriptar la contraseña
+                    String decryptedPassword = EncryptionUtils.decrypt(entry.getPassword());
+                    PasswordController.copyPasswordToClipboard(decryptedPassword);
+                    return;
+                } catch (Exception e) {
+                    JOptionPane.showMessageDialog(null, "Error decrypting password.", "Error", JOptionPane.ERROR_MESSAGE);
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        JOptionPane.showMessageDialog(null, "Password not found.", "Error", JOptionPane.ERROR_MESSAGE);
     }
 
     private static void refreshTable() {
         tableModel.setRowCount(0);
         for (PasswordEntry entry : controller.getPasswords()) {
-            tableModel.addRow(new Object[]{entry.getService(), entry.getUsername(), "********"});
+            tableModel.addRow(new Object[]{
+                    entry.getService(),
+                    entry.getUsername(),
+                    "****", // Mostrar asteriscos en la tabla en vez de la contraseña real
+                    entry.getPassword() // Agregar la contraseña encriptada como una columna oculta
+            });
         }
     }
-
-    private static String getPasswordFromFile(String service, String username) {
-        try (BufferedReader reader = new BufferedReader(new FileReader(PASSWORD_FILE))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] parts = line.split(",");
-                if (parts.length == 3 && parts[0].equals(service) && parts[1].equals(username)) {
-                    return parts[2];
-                }
-            }
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(null, "Error reading password file.", "Error", JOptionPane.ERROR_MESSAGE);
-        }
-        return null;
-    }
-
 
 /*
     public static void createCheckboxesFields(JPanel panel) {
