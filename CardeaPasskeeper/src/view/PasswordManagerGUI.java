@@ -8,9 +8,6 @@ import model.PasswordManager;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.*;
 import java.net.URL;
 
 public class PasswordManagerGUI {

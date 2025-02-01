@@ -14,10 +14,10 @@ public class PasswordController {
     private static final String PASSWORD_FILE = "data/passwords.txt";
 
     /**
-     * Guarda una contraseña en el archivo de almacenamiento, verificando si ya existe.
-     * @param service Nombre del servicio (ejemplo: "Facebook").
-     * @param username Nombre de usuario asociado.
-     * @param plainPassword Contraseña sin encriptar.
+     * Stores a password in the archive file, checking if it already exists.
+     * @param service Service name (example: “Facebook”).
+     * @param username Associated username.
+     * @param plainPassword Password without encryption.
      */
     public static void savePassword(String service, String username, String plainPassword) {
         try {
@@ -43,10 +43,10 @@ public class PasswordController {
     }
 
     /**
-     * Verifica si una contraseña para un servicio y usuario específicos ya existe.
-     * @param service Nombre del servicio.
-     * @param username Nombre de usuario.
-     * @return `true` si la contraseña ya existe, `false` si no.
+     * Check if service or username exists, so there is a password for them.
+     * @param service Service name.
+     * @param username User name.
+     * @return `true` if password exists, `false` if not.
      */
     public static boolean passwordExists(String service, String username) {
         try (BufferedReader reader = new BufferedReader(new FileReader(PASSWORD_FILE))) {
@@ -79,12 +79,6 @@ public class PasswordController {
         return passwordsList;
     }
 
-    /**
-     * Elimina una contraseña si existe en el archivo.
-     * @param service Nombre del servicio.
-     * @param username Nombre de usuario.
-     * @return `true` si la contraseña se eliminó con éxito, `false` si no se encontró.
-     */
     public static boolean removePassword(String service, String username) {
         File file = new File(PASSWORD_FILE);
         File tempFile = new File("data/temp_passwords.txt");
@@ -123,10 +117,6 @@ public class PasswordController {
         }
     }
 
-    /**
-     * Copia una contraseña desencriptada al portapapeles.
-     * @param password Contraseña en texto plano.
-     */
     public static void copyPasswordToClipboard(String password) {
         try {
             StringSelection stringSelection = new StringSelection(password);

@@ -7,7 +7,6 @@ import javax.crypto.spec.SecretKeySpec;
 import javax.swing.*;
 import java.io.*;
 import java.security.SecureRandom;
-import java.util.Base64;
 import org.json.JSONObject;
 
 public class UserController {

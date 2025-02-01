@@ -3,7 +3,7 @@ package model;
 public class PasswordEntry {
     private final String service;
     private final String username;
-    private String password;  // Cambiado de final para permitir actualización
+    private String password;
 
     public PasswordEntry(String service, String username, String password) {
         this.service = service;

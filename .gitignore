@@ -1,2 +1,5 @@
 "node_modules/" 
 "*.log" 
+user.dat
+salt.dat
+password.txt
